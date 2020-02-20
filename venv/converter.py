@@ -20,7 +20,7 @@ def get_input():
     """
     Receives data via GET, validates it and performs currency conversion.
 
-    :return: the converted currency is returned as json
+    :return: The converted currency is returned as json
     """
     amount = (request.args.get("amount"))
     src_currency = (request.args.get("src_currency"))
@@ -33,7 +33,11 @@ def get_input():
     except (AttributeError, ValueError, KeyError) as e:
         return str(e)
 
-    converted_value = _convert_currency(amount, src_currency, dest_currency, reference_date)
+    try:
+        converted_value = _convert_currency(amount, src_currency, dest_currency, reference_date)
+    except ZeroDivisionError as e:
+        return str(e)
+
     return jsonify(amount=converted_value, currency=dest_currency)
 
 
@@ -45,7 +49,7 @@ def _convert_inputs(amount, src_currency, dest_currency, reference_date):
     :param src_currency: Source currency code received as input.
     :param dest_currency: Destination currency code.
     :param reference_date: Date on which the operation is executed.
-    :return: Validated inputs.
+    :return: Converted inputs.
     """
     return _convert_amount(amount), _convert_src_currency(src_currency), _convert_dest_currency(
         dest_currency), _validate_reference_date(reference_date)
@@ -57,7 +61,7 @@ def _convert_src_currency(src_currency):
     If the value is invalid it generates an error, otherwise it returns the value it received as converted input.
 
     :param src_currency: Source currency code received as input.
-    :return: Validated source currency code.
+    :return: Converted source currency code.
     """
     try:
         src_currency = src_currency.upper()
@@ -77,7 +81,7 @@ def _convert_dest_currency(dest_currency):
     If the value is invalid it generates an error, otherwise it returns the value it received as converted input.
 
     :param dest_currency: Destination currency code received as input.
-    :return: Validated destination currency code.
+    :return: Converted destination currency code.
     """
     try:
         dest_currency = dest_currency.upper()
@@ -96,7 +100,7 @@ def _convert_amount(amount):
     Checks that the amount to be converted received as input is valid
 
     :param amount: Amount of currency you want to convert.
-    :return:  Validated amount.
+    :return: Converted amount.
     """
     try:
         return np.float(amount)
@@ -130,6 +134,8 @@ def _convert_currency(amount, src_currency, dest_currency, reference_date):
     """
     currencies_rates = days_cur[reference_date]
     src_value = currencies_rates[src_currency]
+    if src_value == 0:
+        raise ZeroDivisionError("exchange rate error.")
     dest_value = currencies_rates[dest_currency]
     return np.divide(np.multiply(np.float(amount), dest_value), src_value)
 
