@@ -1,7 +1,6 @@
 import xmltodict
 import requests
 import json
-import pandas as pd
 
 URL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml"
 
@@ -21,13 +20,10 @@ with open('data.json', 'w') as fp:
 # From the source dictionary, another dictionary is created containing only the data useful for the application.
 cur_list = doc["gesmes:Envelope"]["Cube"]["Cube"]
 
-new_dict = {}
+days_cur = {}
 
 for day in cur_list:
-    new_dict[day["@time"]] = {}
-    new_dict[day["@time"]]["EUR"] = float(1)
+    days_cur[day["@time"]] = {}
+    days_cur[day["@time"]]["EUR"] = float(1)
     for row in day["Cube"]:
-        new_dict[day["@time"]][row["@currency"]] = float(row["@rate"])
-
-# A dataframe is created using pandas
-dfcur = pd.DataFrame.from_dict(new_dict)
+        days_cur[day["@time"]][row["@currency"]] = float(row["@rate"])

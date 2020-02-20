@@ -7,7 +7,7 @@ import bootstrap
 
 app = Flask(__name__)
 
-dfcur = bootstrap.dfcur
+days_cur = bootstrap.days_cur
 
 
 @app.route("/")
@@ -63,11 +63,12 @@ def _convert_src_currency(src_currency):
         src_currency = src_currency.upper()
     except AttributeError:
         raise AttributeError("src_currency code is not valid") from AttributeError
-    try:
-        if dfcur.loc[src_currency].any():
-            return src_currency
-    except KeyError:
-        raise KeyError("{} doesn't exist".format(src_currency)) from KeyError
+
+    fist_day = list(days_cur.keys())[0]
+    if src_currency in days_cur[fist_day]:
+        return src_currency
+    else:
+        raise KeyError("{} doesn't exist".format(src_currency))
 
 
 def _convert_dest_currency(dest_currency):
@@ -82,11 +83,12 @@ def _convert_dest_currency(dest_currency):
         dest_currency = dest_currency.upper()
     except AttributeError:
         raise AttributeError("src_currency code is not valid") from AttributeError
-    try:
-        if dfcur.loc[dest_currency].any():
-            return dest_currency
-    except KeyError:
-        raise KeyError("{} doesn't exist".format(dest_currency)) from KeyError
+
+    fist_day = list(days_cur.keys())[0]
+    if dest_currency in days_cur[fist_day]:
+        return dest_currency
+    else:
+        raise KeyError("{} doesn't exist".format(dest_currency))
 
 
 def _convert_amount(amount):
@@ -110,7 +112,7 @@ def _validate_reference_date(reference_date):
     :return: Validated reference date.
     """
     try:
-        if dfcur[reference_date].any():
+        if days_cur[reference_date]:
             return reference_date
     except KeyError:
         raise KeyError("{} doesn't exist".format(reference_date)) from KeyError
@@ -126,7 +128,7 @@ def _convert_currency(amount, src_currency, dest_currency, reference_date):
     :param reference_date: Validated date on which the operation is executed.
     :return: The converted value.
     """
-    currencies_rates = dfcur[reference_date]
+    currencies_rates = days_cur[reference_date]
     src_value = currencies_rates[src_currency]
     dest_value = currencies_rates[dest_currency]
     return np.divide(np.multiply(np.float(amount), dest_value), src_value)

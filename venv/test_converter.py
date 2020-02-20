@@ -1,8 +1,9 @@
 import converter as c
 import pytest
 
+
 def test_date_validation():
-    date = list(c.dfcur)[0]
+    date = list(c.days_cur.keys())[0]
     assert c._validate_reference_date(date) == date
 
 
