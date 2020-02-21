@@ -33,3 +33,14 @@ Where __amount__ and __currency__ are the corresponding converted amount and the
 If the currency ISO code is not recognised or present on the [European Bank's website](https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml) or the reference date is not listed on the website, a string error is returned.
 
 ## Docker installation
+To create a docker image of the application, simply run the following command:
+```bash
+docker build --tag converter .
+```
+This command builds a docker image from the DockerFile in the project folder.
+
+Once the image is created, use the following command to run the application:
+
+```bash
+docker run --name python-app-converter -p 5000:5000 converter
+```
