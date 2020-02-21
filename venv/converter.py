@@ -35,7 +35,7 @@ def get_input():
 
     try:
         converted_value = _convert_currency(amount, src_currency, dest_currency, reference_date)
-    except ZeroDivisionError as e:
+    except (ZeroDivisionError, TypeError) as e:
         return str(e)
 
     return jsonify(amount=converted_value, currency=dest_currency)
@@ -135,9 +135,12 @@ def _convert_currency(amount, src_currency, dest_currency, reference_date):
     currencies_rates = days_cur[reference_date]
     src_value = currencies_rates[src_currency]
     if src_value == 0:
-        raise ZeroDivisionError("exchange rate error.")
+        raise ZeroDivisionError("Invalid exchange rate.")
     dest_value = currencies_rates[dest_currency]
-    return np.divide(np.multiply(np.float(amount), dest_value), src_value)
+    try:
+        return np.divide(np.multiply(np.float(amount), dest_value), src_value)
+    except TypeError:
+        raise TypeError("Invalid exchange rate.") from TypeError
 
 
 if __name__ == "__main__":
